@@ -6,7 +6,8 @@ function App() {
   useEffect(() => {
     async function fetchData() {
       try {
-        await GitHubService.fetchAndStoreRepos();
+        await GitHubService.sumLanguages();
+        // await GitHubService.fetchAndStoreRepos();
       } catch (error) {
         console.error("Error al almacenar repositorios:", error);
       }
