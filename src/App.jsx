@@ -1,6 +1,19 @@
+import { useEffect } from "react";
 import "./App.css";
+import GitHubService from "./services/GitHubService";
 
 function App() {
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        await GitHubService.fetchAndStoreRepos();
+      } catch (error) {
+        console.error("Error al almacenar repositorios:", error);
+      }
+    }
+    fetchData();
+  }, []);
+
   return (
     <div className="main">
       {/* grafico 1 */}
