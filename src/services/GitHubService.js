@@ -88,7 +88,6 @@ class GitHubService {
       last_updated: "",
       languages: languageChart,
     };
-    console.log(pieChartData);
   }
 
   /**
