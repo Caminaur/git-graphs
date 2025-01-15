@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import "./App.css";
 import GitHubService from "./services/GitHubService";
-
+import PieChart from "./charts/PieChart/PieChart";
 function App() {
   useEffect(() => {
     async function fetchData() {
       try {
-        await GitHubService.fetchAndStoreRepos();
+        await GitHubService.sumLanguages();
+        // await GitHubService.fetchAndStoreRepos();
       } catch (error) {
         console.error("Error al almacenar repositorios:", error);
       }
@@ -16,7 +17,7 @@ function App() {
 
   return (
     <div className="main">
-      {/* grafico 1 */}
+      <PieChart />
       {/* grafico 2 */}
       {/* grafico 3 */}
       {/* grafico 4 */}

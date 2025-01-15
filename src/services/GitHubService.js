@@ -58,6 +58,38 @@ class GitHubService {
     }
   }
 
+  async sumLanguages() {
+    const languageSum = {};
+
+    const response = await fetch("./data.json");
+    const repos = await response.json();
+    repos.forEach((repo) => {
+      const languages = repo.languages;
+      if (languages) {
+        for (const language in languages) {
+          if (languageSum[language]) {
+            // Use language as the key directly
+            languageSum[language] += languages[language]; // Add the value of the language
+          } else {
+            languageSum[language] = languages[language]; // Initialize the value for the language
+          }
+        }
+      }
+    });
+
+    const languageChart = [];
+    for (const language in languageSum) {
+      languageChart.push({ language: language, value: languageSum[language] });
+    }
+
+    const pieChartData = {
+      name: "Pie Chart",
+      description: "",
+      last_updated: "",
+      languages: languageChart,
+    };
+  }
+
   /**
    * Obtiene, filtra y almacena los repositorios del usuario en un archivo JSON.
    * @param {string} filePath - Ruta del archivo JSON donde se almacenarán los datos.
