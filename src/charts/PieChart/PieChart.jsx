@@ -19,6 +19,65 @@ function PieChart() {
     }
     fetchData();
   }, []);
+
+  function makeTooltip() {
+    return d3
+      .select("body")
+      .append("div")
+      .attr("class", styles.tooltip)
+      .style("position", "absolute")
+      .style("opacity", 0)
+      .style("background-color", "rgba(255 255 255 / 0.7)")
+      .style("color", "black")
+      .style("border-radius", "5px")
+      .style("padding", "5px 10px")
+      .style("pointer-events", "none")
+      .style("border", "2px solid lab(0 0 0 / 0.43)");
+  }
+
+  function createArcs() {
+    const zeroArc = d3
+      .arc()
+      .innerRadius(0) // donde arranca
+      .outerRadius(15) // donde termina
+      .cornerRadius(1);
+
+    const arc = d3
+      .arc()
+      .innerRadius(0) // donde arranca
+      .outerRadius(250) // donde termina
+      .cornerRadius(5);
+
+    const hoverArc = d3
+      .arc()
+      .innerRadius(0) // donde arranca
+      .outerRadius(260) // donde termina
+      .cornerRadius(1);
+
+    return { zeroArc, arc, hoverArc };
+  }
+
+  function highlightArc(arcs, arc, hoverArc, d, selectedArc) {
+    arcs
+      .selectAll(`.${styles.text}`)
+      .transition()
+      .duration(300)
+      .style("opacity", (textData) => (textData === d ? 1 : 0.1));
+
+    arcs
+      .selectAll("path")
+      .transition()
+      .duration(300)
+      .attr("d", arc)
+      .style("opacity", (pathData) => (pathData === d ? 0.95 : 0.4));
+
+    selectedArc
+      .transition()
+      .duration(300)
+      .style("opacity", 0.95)
+      .attr("d", hoverArc);
+  }
+
   useEffect(() => {
     if (chartData.length === 0) return; // Esperar a que los datos estén disponibles
 
@@ -32,25 +91,16 @@ function PieChart() {
       .sort((a, b) => b.value - a.value)
       .slice(0, 6);
 
-    const zeroArc = d3
-      .arc()
-      .innerRadius(0) // donde arranca
-      .outerRadius(15) // donde termina
-      .cornerRadius(1);
-    const arc = d3
-      .arc()
-      .innerRadius(0) // donde arranca
-      .outerRadius(250) // donde termina
-      .cornerRadius(5);
-    const hoverArc = d3
-      .arc()
-      .innerRadius(0) // donde arranca
-      .outerRadius(260) // donde termina
-      .cornerRadius(1);
+    // Arcs
+    const { zeroArc, arc, hoverArc } = createArcs();
 
-    // Crear el contenedor SVG
+    // Tooltip
+    const tooltip = makeTooltip();
+
+    // SVG
     const svg = d3
       .select(svgRef.current)
+      .attr("class", styles.pieChart)
       .attr("width", width)
       .attr("height", height);
 
@@ -73,31 +123,14 @@ function PieChart() {
       .attr("fill", (d) => color(d))
       .style("opacity", 0.8)
       .on("mouseover", function (event, d) {
-        // Show tooltip on hover
+        // Tooltip hover
         tooltip.transition().duration(200).style("opacity", 1);
         tooltip
           .html(`${d.data.language}: ${formatNumber(d.data.value)}`)
           .style("left", `${event.pageX + 10}px`)
           .style("top", `${event.pageY - 28}px`);
 
-        arcs
-          .selectAll(`.${styles.text}`)
-          .transition()
-          .duration(300)
-          .style("opacity", (textData) => (textData === d ? 1 : 0.1));
-
-        arcs
-          .selectAll("path")
-          .transition()
-          .duration(300)
-          .attr("d", arc)
-          .style("opacity", (pathData) => (pathData === d ? 0.95 : 0.4));
-
-        d3.select(this)
-          .transition()
-          .duration(300)
-          .style("opacity", 0.95)
-          .attr("d", hoverArc);
+        highlightArc(arcs, arc, hoverArc, d, d3.select(this));
       })
       .on("mousemove", function (event) {
         // Update tooltip position on mouse move
@@ -106,7 +139,7 @@ function PieChart() {
           .style("top", `${event.pageY - 25}px`);
       })
 
-      .on("mouseout", function (d, s) {
+      .on("mouseout", function () {
         // Hide tooltip when mouse leaves
         tooltip.transition().duration(200).style("opacity", 0);
         d3.selectAll("path")
@@ -151,19 +184,6 @@ function PieChart() {
       .style("z-index", "2")
       .attr("id", (d) => d.id);
   }, [chartData]);
-  // Create a tooltip element
-  const tooltip = d3
-    .select("body")
-    .append("div")
-    .attr("class", styles.tooltip)
-    .style("position", "absolute")
-    .style("opacity", 0)
-    .style("background-color", "rgba(255 255 255 / 0.7)")
-    .style("color", "black")
-    .style("border-radius", "5px")
-    .style("padding", "5px 10px")
-    .style("pointer-events", "none")
-    .style("border", "1px solid lab(0 0 0 / 0.43)");
 
   return (
     <div className={styles.chart}>

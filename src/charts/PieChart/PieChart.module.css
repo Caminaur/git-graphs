@@ -8,3 +8,8 @@
 }
 .text {
 }
+.pieChart {
+  border: 4px solid #c2cfe7;
+  margin: 1rem;
+  border-radius: 8px;
+}
