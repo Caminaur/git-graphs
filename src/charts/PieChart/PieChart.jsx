@@ -7,6 +7,11 @@ function PieChart() {
   const [chartData, setChartData] = useState([]);
   const svgRef = useRef(null);
 
+  const width = 600;
+  const height = 600;
+
+  const color = d3.scaleOrdinal(d3.schemeObservable10);
+
   function formatNumber(num) {
     return num.toLocaleString("de-DE");
   }
@@ -81,12 +86,8 @@ function PieChart() {
   useEffect(() => {
     if (chartData.length === 0) return; // Esperar a que los datos estén disponibles
 
-    const color = d3.scaleOrdinal(d3.schemeObservable10);
-
-    const width = 600;
-    const height = 600;
-
     const pie = d3.pie().value((d) => d.value);
+
     const data = chartData[0]["chart"]["languages"]
       .sort((a, b) => b.value - a.value)
       .slice(0, 6);
@@ -157,21 +158,26 @@ function PieChart() {
       .delay((d, i) => 200 * i)
       .attr("d", arc);
 
-    const arcPadding = 30; // Distance between the arc and text
+    const arcYPadding = 30; // Distance between the arc and text
+    const arcXPadding = 50; // Distance between the arc and text
     let previousY = 0; // Track the last used position to avoid overlap
+    let previousX = 0; // Track the last used position to avoid overlap
 
     const text = arcs
       .append("text")
       .attr("class", styles.text)
       .attr("transform", (d) => {
         const centroid = arc.centroid(d);
-        let offsetX = centroid[0] - 30;
+        let offsetX = centroid[0] - 25;
         let offsetY = centroid[1];
 
-        // Apply a radial offset to prevent overlap
-        if (Math.abs(offsetY - previousY) < arcPadding) {
-          offsetY += arcPadding;
+        if (
+          Math.abs(offsetY - previousY) < arcYPadding &&
+          Math.abs(offsetX - previousX) < arcXPadding
+        ) {
+          offsetY += arcYPadding;
         }
+        previousX = offsetX;
         previousY = offsetY;
 
         return `translate(${offsetX}, ${offsetY})`;
