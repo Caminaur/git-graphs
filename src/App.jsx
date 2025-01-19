@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import "./App.css";
 import GitHubService from "./services/GitHubService";
-import PieChart from "./charts/PieChart/PieChart";
+import PieChart from "./charts/pieChart/pieChart";
+
 function App() {
   useEffect(() => {
     async function fetchData() {
