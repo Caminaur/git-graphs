@@ -13,3 +13,29 @@
   margin: 1rem;
   border-radius: 8px;
 }
+.chartContainer {
+  width: min-content;
+  position: relative;
+}
+.selectorDiv {
+  margin: 1rem;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+.selectorDiv ul {
+  list-style-type: none;
+}
+.selectorDiv ul li {
+  list-style-type: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.selector {
+}
+
+.selected {
+  /* font-weight: bold; */
+  color: #007bff;
+}

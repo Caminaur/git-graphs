@@ -4,8 +4,30 @@ import { useEffect } from "react";
 import * as d3 from "d3";
 
 function PieChart() {
+  const [defaultChartData, setDefaultChartData] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const svgRef = useRef(null);
+
+  const categories = ["FRONTEND", "BACKEND"];
+  const frontTech = [
+    "HTML",
+    "CSS",
+    "JAVASCRIPT",
+    "Blade",
+    "Vue",
+    "SCSS",
+    "Less",
+  ];
+  const backendTech = [
+    "Dart",
+    "Swift",
+    "Kotlin",
+    "Objective-C",
+    "PHP",
+    "Shell",
+    "Python",
+  ];
 
   const width = 600;
   const height = 600;
@@ -15,15 +37,6 @@ function PieChart() {
   function formatNumber(num) {
     return num.toLocaleString("de-DE");
   }
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await fetch("./chartData.json");
-      const repos = await response.json();
-      setChartData(repos);
-    }
-    fetchData();
-  }, []);
 
   function makeTooltip() {
     return d3
@@ -83,14 +96,54 @@ function PieChart() {
       .attr("d", hoverArc);
   }
 
+  function filterData(category) {
+    if (selectedCategory === category) {
+      setSelectedCategory(null);
+      setChartData(defaultChartData);
+    } else {
+      let newData = [];
+      if (category === "FRONTEND") {
+        newData = defaultChartData.filter((data) =>
+          frontTech.includes(data.language)
+        );
+      }
+      if (category === "BACKEND") {
+        newData = defaultChartData.filter((data) =>
+          backendTech.includes(data.language)
+        );
+      }
+      setSelectedCategory(category);
+      setChartData(newData); // Filtrar los datos según la categoría seleccionada
+    }
+  }
+
+  function sliceDate(data) {
+    if (selectedCategory !== null) {
+      if (selectedCategory === "FRONTEND") {
+        return data.sort((a, b) => b.value - a.value).slice(0, 4);
+      } else {
+        return data.sort((a, b) => b.value - a.value).slice(0, 3);
+      }
+    } else {
+      return data.sort((a, b) => b.value - a.value).slice(0, 6);
+    }
+  }
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch("./chartData.json");
+      const repos = await response.json();
+      setDefaultChartData(repos[0]["chart"]["languages"]);
+      setChartData(repos[0]["chart"]["languages"]);
+    }
+    fetchData();
+  }, []);
+
   useEffect(() => {
     if (chartData.length === 0) return; // Esperar a que los datos estén disponibles
 
     const pie = d3.pie().value((d) => d.value);
-
-    const data = chartData[0]["chart"]["languages"]
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 6);
+    const data = sliceDate(chartData);
 
     // Arcs
     const { zeroArc, arc, hoverArc } = createArcs();
@@ -189,11 +242,38 @@ function PieChart() {
       .style("pointer-events", "none")
       .style("z-index", "2")
       .attr("id", (d) => d.id);
-  }, [chartData]);
+
+    const chartContainer = d3.select(`.${styles.chartContainer}`);
+
+    chartContainer.selectAll(`.${styles.selectorDiv}`).remove();
+
+    const selectorDiv = chartContainer
+      .append("div")
+      .attr("class", styles.selectorDiv);
+
+    const selectorList = selectorDiv.append("ul");
+
+    categories.forEach((category, index) => {
+      selectorList
+        .append("li")
+        .text(category)
+        .attr(
+          "class",
+          `${styles.selector} ${
+            selectedCategory === category ? styles.selected : ""
+          }`
+        )
+        .on("click", (e) => {
+          filterData(category); // Llama a tu función de filtrado
+        });
+    });
+  }, [chartData, selectedCategory]);
 
   return (
     <div className={styles.chart}>
-      <svg ref={svgRef}></svg>
+      <div className={styles.chartContainer}>
+        <svg ref={svgRef}></svg>
+      </div>
     </div>
   );
 }
