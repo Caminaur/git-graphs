@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import "./App.css";
 import GitHubService from "./services/GitHubService";
 import PieChart from "./charts/pieChart/pieChart";
+import BarChart from "./charts/BarChart/BarChart";
 
 function App() {
   useEffect(() => {
@@ -19,7 +20,7 @@ function App() {
   return (
     <div className="main">
       <PieChart />
-      {/* grafico 2 */}
+      <BarChart />
       {/* grafico 3 */}
       {/* grafico 4 */}
     </div>
