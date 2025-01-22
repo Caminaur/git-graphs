@@ -19,7 +19,7 @@ function App() {
 
   return (
     <div className="main">
-      <PieChart />
+      {/* <PieChart /> */}
       <BarChart />
       {/* grafico 3 */}
       {/* grafico 4 */}

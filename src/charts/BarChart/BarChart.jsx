@@ -42,6 +42,20 @@ function BarChart() {
     return hsl.formatHex();
   }
 
+  function resetBars(bars, xScale) {
+    bars
+      .interrupt()
+      .transition()
+      .duration(200)
+      .attr("opacity", 1)
+      .attr("width", xScale.bandwidth())
+      .attr("x", (d) => xScale(d.language));
+  }
+
+  function dimBars(bars) {
+    bars.interrupt().transition().duration(200).attr("opacity", 0.4);
+  }
+
   useEffect(() => {
     async function fetchData() {
       const response = await fetch("./chartData.json");
@@ -88,12 +102,29 @@ function BarChart() {
       .data(data)
       .enter()
       .append("rect")
+      .attr("class", styles.bar)
       .attr("x", (d) => xScale(d.language)) // Posición X
       .attr("y", (d) => yScale(d.value)) // Posición Y
       .attr("width", xScale.bandwidth()) // Ancho de las barras
       .attr("height", (d) => height - margin.bottom - yScale(d.value)) // Altura de las barras
       .attr("fill", (d) => color(d)) // Color de las barras
       .on("mouseover", function (event, d) {
+        const currentBar = d3.select(this);
+        const originalWidth = xScale.bandwidth();
+        const newWidth = originalWidth * 1.2; // Aumentar el ancho al 120%
+        const shift = (newWidth - originalWidth) / 2; // Para centrar la barra
+
+        resetBars(d3.selectAll(`.${styles.bar}`), xScale);
+        // dimBars(d3.selectAll(`.${styles.bar}`));
+
+        currentBar
+          .interrupt()
+          .transition()
+          .duration(200)
+          .attr("width", newWidth)
+          .attr("x", xScale(d.language) - shift)
+          .attr("opacity", 1);
+
         let tooltipColor = darkenColorHSL(color(d), 10);
         // Tooltip hover
         tooltip.transition().duration(200).style("opacity", 1);
@@ -114,6 +145,8 @@ function BarChart() {
       .on("mouseout", function () {
         // Hide tooltip when mouse leaves
         tooltip.transition().duration(200).style("opacity", 0);
+
+        resetBars(d3.selectAll(`.${styles.bar}`), xScale);
       });
 
     // Eje X
